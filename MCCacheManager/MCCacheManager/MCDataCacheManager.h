@@ -28,9 +28,13 @@
  */
 - (void)MCwriteData:(id)dict withFile:(NSString *)name withExpireTime:(double)time;
 /**
- *  读取数据
+ *  读取数据NSDictionary
  */
 - (id)MCreadData:(NSString *)name;
+/**
+ *  读取数据JSON
+ */
+- (id)MCreadJSONData:(NSString *)name;
 /**
  *  检查时间是否过期
  */

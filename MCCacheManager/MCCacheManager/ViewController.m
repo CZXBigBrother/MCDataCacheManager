@@ -17,7 +17,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
 }
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     
@@ -26,15 +25,19 @@
     /**
      *  设定默认时间
      */
-    [cache MCsetDefautExpireTime:15];
+    [cache MCsetDefautExpireTime:5];
     
     if ([cache MCcheckExpireFile:@"mc"]) {
+        NSLog(@"数据已过期 result = %@",[cache MCreadData:@"mc"]);
+
         /**
          *  这个地方写网络加载
          */
         NSMutableDictionary * testParam=[NSMutableDictionary dictionary];
                 [testParam setObject:@"test1" forKey:@"mc1"];
                 [testParam setObject:@"test2" forKey:@"mc2"];
+                [testParam setObject:@"test2" forKey:@"mc3"];
+
         NSLog(@"数据过期,插入新数据 result = %@",testParam);
         /**
          *  使用默认时间

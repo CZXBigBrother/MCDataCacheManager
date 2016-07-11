@@ -81,11 +81,21 @@ static MCDataCacheManager *_instance;
     [self writeConfigExpireTime:time withName:name];
 }
 /**
- *  读取数据
+ *  读取数据NSDictionary
  */
 - (id)MCreadData:(NSString *)name {
     if ([self readFile:name]) {
         return [NSDictionary dictionaryWithContentsOfFile:[self readFile:name]];
+    }else {
+        return nil;
+    }
+}
+/**
+ *  读取数据JSON
+ */
+- (id)MCreadJSONData:(NSString *)name {
+    if ([self readFile:name]) {
+        return [NSString stringWithContentsOfFile:[self readFile:name] encoding:NSUTF8StringEncoding error:nil];
     }else {
         return nil;
     }
