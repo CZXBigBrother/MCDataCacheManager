@@ -17,12 +17,23 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    MCDataCacheManager * cache = [MCDataCacheManager shareInstance];
+    [cache MCAccordingToTheVersionStore:YES];
+    [cache MCwriteData:@"dasdasdsadsadsa" withFile:@"2233" withAccount:@"czx1" withExpireTime:0];
+        NSLog(@"%lf",[cache folderSize]);
+    NSLog(@"%@",[cache MCGetPath]);
 }
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     
-    MCDataCacheManager * cache = [MCDataCacheManager shareInstance];
-//    [cache MCwriteData:@"dasdasdsadsadsa" withFile:@"1" withAccount:@"czx" withExpireTime:0];
-//    [cache MCwriteData:@"dasdasdsadsadsa" withFile:@"2" withAccount:@"czx" withExpireTime:0];
+//    NSLog(@"TOUCH");
+//    NSLog(@"%@",[MCDataCacheManager MCGetPath]);
+
+
+
+//    [cache MCsetmaxCacheSize:2];
+//    for (NSInteger i = 0; i < 3000; i++) {
+//        [cache MCwriteData:@"dasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsa" withFile:[NSString stringWithFormat:@"%zd",i] withAccount:@"czx" withExpireTime:0];
+//    }
 //    [cache MCwriteData:@"dasdasdsadsadsa" withFile:@"3" withAccount:@"czx" withExpireTime:0];
 //    [cache MCwriteData:@"dasdasdsadsadsa" withFile:@"4" withAccount:@"czx" withExpireTime:0];
 //    [cache MCwriteData:@"dasdasdsadsadsa" withFile:@"4" withAccount:@"czx" withExpireTime:0];
@@ -34,9 +45,7 @@
 //    [cache MCremoveAllAccount:@"czx"];
 //    [cache MCwriteData:@"dasdasdsadsadsa" withFile:@"dasdsadQWEQWEWQEWQEQWEWQE" withAccount:@"czx" withExpireTime:0];
 //    NSLog(@"withAccount === %@",[cache MCreadJSONData:@"dasdsad" withAccount:@"czx"]);
-//    NSLog(@"%@",[cache MCGetPath]);
-    
-    
+
     /**
      *  设定默认时间
      */
@@ -58,8 +67,8 @@
 //         *  使用默认时间
 //         */
 //        [cache MCwriteDefautExpireData:@"312321" withFile:@"mc"];
-    [cache MCremoveData:@"mc"];
-// 
+//    [cache MCremoveData:@"mc"];
+//
 //        /**
 //         * 使用自定义时间
 //         */

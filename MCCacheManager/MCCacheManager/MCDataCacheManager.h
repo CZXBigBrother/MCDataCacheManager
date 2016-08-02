@@ -10,11 +10,41 @@
 @interface MCDataCacheManager : NSObject
 
 + (instancetype)shareInstance;
-/*-------------------------------------写入-------------------------------------*/
+/*-------------------------------------其他-------------------------------------*/
 /**
  *  设置默认过期时间
  */
 - (void)MCsetDefautExpireTime:(double)time;
+/**
+ *  设置自动删除的最大存储空间,到达最大值自动删除最早的缓存,如果设置0或者不设置,则不自动删除
+ *  @param maxCacheSize(MB)
+ */
+- (void)MCsetmaxCacheSize:(double)maxCacheSize;
+/**
+ *  根本版本号存储,更新应用版本之后自动删除就版本缓存
+ */
+- (void)MCAccordingToTheVersionStore:(BOOL)According;
+/**
+ *  获取缓存路径
+ */
+- (NSString *)MCGetPath;
++ (NSString *)MCGetPath;
+/**
+ *  获取缓存空间大小
+ */
++ (float)folderSize;
+- (float)folderSize;
+/**
+ *  手动执行自动删除最大缓存方法
+ */
+- (void)autoClearCache;
+/**
+ *  手动执行自动删除最大缓存方法(自定义最大限额)
+ *
+ *  @param limitSize 删除到这个存储大小的缓存
+ */
+- (void)autoClearCache:(double)limitSize;
+/*-------------------------------------写入-------------------------------------*/
 /**
  *  写入数据(默认过期时间为0)
  */
@@ -81,10 +111,6 @@
  *  删除单个文件夹
  */
 - (void)MCremoveAllAccount:(NSString *)account;
-/*-------------------------------------其他-------------------------------------*/
-/**
- *  获取缓存路径
- */
-- (NSString *)MCGetPath;
-+ (NSString *)MCGetPath;
+
+
 @end

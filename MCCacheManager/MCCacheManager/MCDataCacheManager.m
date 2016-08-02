@@ -17,6 +17,11 @@
 
 @property(nonatomic, assign)double defautTime;
 
+@property(nonatomic, assign)double maxCacheSize;
+
+@property(nonatomic, assign)BOOL isAccording;
+
+@property(nonatomic, copy)NSString *path;
 @end
 
 @implementation MCDataCacheManager
@@ -57,17 +62,12 @@ static MCDataCacheManager *_instance;
 }
 /*-------------------------------------写入-----------------------------------------------------------*/
 /**
- *  设置默认过期时间
- */
-- (void)MCsetDefautExpireTime:(double)time {
-    self.defautTime = time;
-}
-/**
  *  写入数据(默认过期时间为0)
  */
 - (void)MCwriteNoDefautExpireData:(id)dict withFile:(NSString *)name {
     [self MCwriteData:dict withFile:name withExpireTime:0];
 }
+
 - (void)MCwriteNoDefautExpireData:(id)dict withFile:(NSString *)name withAccount:(NSString *)account{
     [self MCwriteData:dict withFile:name withAccount:account withExpireTime:0];
 }
@@ -153,7 +153,7 @@ static MCDataCacheManager *_instance;
 /*-------------------------------------删除-----------------------------------------------------------*/
 - (void)MCremoveData:(NSString *)name {
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString * filepath = MC_FILE_PATH;
+    NSString * filepath = [self MCGetPath];
     filepath = [filepath stringByAppendingPathComponent:name];
     NSError *error;
     if ([fileManager removeItemAtPath:filepath error:&error] != YES)
@@ -162,7 +162,7 @@ static MCDataCacheManager *_instance;
 }
 - (void)MCremoveData:(NSString *)name withAccount:(NSString *)account{
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString * filepath = MC_FILE_PATH;
+    NSString * filepath = [self MCGetPath];
     filepath = [[filepath stringByAppendingPathComponent:account]stringByAppendingPathComponent:name];
     NSError *error;
     if ([fileManager removeItemAtPath:filepath error:&error] != YES)
@@ -171,20 +171,29 @@ static MCDataCacheManager *_instance;
 }
 - (void)MCremoveAllData {
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString * filepath = MC_FILE_PATH;
+    NSString * filepath = [self MCGetPath];
     NSError *error;
     if ([fileManager removeItemAtPath:filepath error:&error] != YES)
         NSLog(@"Unable to delete file: %@", [error localizedDescription]);
 }
 - (void)MCremoveAllAccount:(NSString *)account {
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString * filepath = [MC_FILE_PATH stringByAppendingPathComponent:account];
+    NSString * filepath = [[self MCGetPath] stringByAppendingPathComponent:account];
     NSError *error;
     if ([fileManager removeItemAtPath:filepath error:&error] != YES)
         NSLog(@"Unable to delete file: %@", [error localizedDescription]);
     [self deleteConfigAccount:account];
 }
 #pragma mark -配置参数
+/**
+ *  设置默认过期时间
+ */
+- (void)MCsetDefautExpireTime:(double)time {
+    self.defautTime = time;
+}
+- (void)MCsetmaxCacheSize:(double)maxCacheSize {
+    self.maxCacheSize = maxCacheSize * 1024;
+}
 - (NSMutableArray *)fileList {
     if (_fileList == nil) {
         _fileList = [NSMutableArray array];
@@ -266,7 +275,7 @@ static MCDataCacheManager *_instance;
  *  单独账户独立文件写入
  */
 - (void)writeData:(id)param withFile:(NSString *)name withAccount:(NSString *)Account {
-    NSString * docPath = [MC_FILE_PATH stringByAppendingPathComponent:Account];
+    NSString * docPath = [[self MCGetPath] stringByAppendingPathComponent:Account];
     NSFileManager * mgr=[NSFileManager defaultManager];
     BOOL dir=NO;
     BOOL exists =[mgr fileExistsAtPath:docPath isDirectory:&dir];
@@ -282,12 +291,13 @@ static MCDataCacheManager *_instance;
             NSLog(@"添加失败 %@",error);
         }
     }
+    [self autoClearCache];
 }
 /**
  *  写入文件初始方法
  */
 - (void)writeData:(id)param withFile:(NSString *)name {
-    NSString * docPath = MC_FILE_PATH;
+    NSString * docPath = [self MCGetPath];
     NSFileManager * mgr=[NSFileManager defaultManager];
     BOOL dir=NO;
     BOOL exists =[mgr fileExistsAtPath:docPath isDirectory:&dir];
@@ -303,12 +313,13 @@ static MCDataCacheManager *_instance;
             NSLog(@"添加失败 %@",error);
         }
     }
+    [self autoClearCache];
 }
 /**
  *  获取文件初始方法
  */
 - (NSString *)readFile:(NSString *)name {
-    NSString * filepath = MC_FILE_PATH;
+    NSString * filepath = [self MCGetPath];
     filepath = [filepath stringByAppendingPathComponent:name];
     NSFileManager * mgr=[NSFileManager defaultManager];
     BOOL dir=NO;
@@ -329,9 +340,95 @@ static MCDataCacheManager *_instance;
  *  获取缓存路径
  */
 - (NSString *)MCGetPath {
-    return MC_FILE_PATH;
+    if (self.isAccording) {
+        return self.path;
+    }else {
+        return MC_FILE_PATH;
+    }
 }
 + (NSString *)MCGetPath {
     return MC_FILE_PATH;
+}
+- (float)folderSize {
+    return [MCDataCacheManager folderSize];
+}
++ (float)folderSize {
+    NSFileManager* manager = [NSFileManager defaultManager];
+    if (![manager fileExistsAtPath:[MCDataCacheManager MCGetPath]]) return 0;
+    NSEnumerator *childFilesEnumerator = [[manager subpathsAtPath:[MCDataCacheManager MCGetPath]] objectEnumerator];
+    NSString* fileName;
+    long long folderSize = 0;
+    while ((fileName = [childFilesEnumerator nextObject]) != nil){
+        NSString* fileAbsolutePath =[[MCDataCacheManager MCGetPath] stringByAppendingPathComponent:fileName];
+        folderSize += [MCDataCacheManager fileSizeAtPath:fileAbsolutePath];
+    }
+    return folderSize/(1024.0);
+}
++ (long long)fileSizeAtPath:(NSString *)filePath{
+    NSFileManager* manager = [NSFileManager defaultManager];
+    if ([manager fileExistsAtPath:filePath]){
+        return [[manager attributesOfItemAtPath:filePath error:nil] fileSize];
+    }
+    return 0;
+}
+- (void)autoClearCache {
+    [self autoClearCache:self.maxCacheSize];
+}
+- (void)autoClearCache:(double)limitSize {
+    if (limitSize == 0.0) return;
+    if ([self folderSize] > limitSize) {
+        __block double clearSize = [self folderSize] - limitSize;
+        [self.fileList sortUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
+            return [obj1[MC_PARAM_EXTIME_KEY] doubleValue] > [obj2[MC_PARAM_EXTIME_KEY] doubleValue];
+        }];
+        NSMutableArray * removeArr = [NSMutableArray array];
+        [self.fileList enumerateObjectsUsingBlock:^(NSDictionary * data, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSLog(@"%zd name %@",[MCDataCacheManager fileSizeAtPath:[[self MCGetPath] stringByAppendingPathComponent:data[MC_PARAM_NAME_KEY]]],data[MC_PARAM_NAME_KEY]);
+            double fileSize = [MCDataCacheManager fileSizeAtPath:[[self MCGetPath] stringByAppendingPathComponent:data[MC_PARAM_NAME_KEY]]]/(1024.0);
+            [removeArr addObject:data];
+            clearSize = clearSize - fileSize;
+            if (clearSize <= 0) {
+                *stop = YES;
+            }
+        }];
+        [removeArr enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [self MCremoveData:obj[MC_PARAM_NAME_KEY]];
+        }];
+    }
+}
+- (void)MCAccordingToTheVersionStore:(BOOL)According {
+    self.isAccording = According;
+    if (According) {
+        self.path = [MC_FILE_PATH stringByAppendingPathComponent:[self currentVersion]];
+        [self removeOldVersion];
+    }
+}
+- (NSString *)currentVersion {
+    NSString *resultString;
+    NSDictionary *infoDic = [[NSBundle mainBundle] infoDictionary];
+    resultString = [NSString stringWithFormat:@"%@%@", infoDic[@"CFBundleShortVersionString"], infoDic[@"CFBundleVersion"]];
+    return resultString;
+}
+- (void)removeOldVersion {
+    NSFileManager *mgr = [NSFileManager defaultManager];
+    BOOL dir = NO;
+    BOOL exist = [mgr fileExistsAtPath:MC_FILE_PATH isDirectory:&dir];
+    if(!exist) {
+        NSLog(@"文件路径不存在!!!!!!");
+    }
+    if (dir) {
+        NSArray *array = [mgr contentsOfDirectoryAtPath:MC_FILE_PATH error:nil];
+        NSFileManager *fileManager = [NSFileManager defaultManager];
+        for (NSString * name in array) {
+            NSLog(@"%@",name);
+            if (![name isEqualToString:[self currentVersion]]) {
+                NSString * filepath = [MC_FILE_PATH stringByAppendingPathComponent:name];
+                NSError *error;
+                if ([fileManager removeItemAtPath:filepath error:&error] != YES)
+                    NSLog(@"Unable to delete file: %@", [error localizedDescription]);
+            }
+
+        }
+    }
 }
 @end

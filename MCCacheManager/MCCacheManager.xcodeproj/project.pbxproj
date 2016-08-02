@@ -492,6 +492,7 @@
 				A04185DF1C5F34C100DA0FE9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		A04185E01C5F34C100DA0FE9 /* Build configuration list for PBXNativeTarget "MCCacheManagerTests" */ = {
 			isa = XCConfigurationList;
@@ -500,6 +501,7 @@
 				A04185E21C5F34C100DA0FE9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		A04185E31C5F34C100DA0FE9 /* Build configuration list for PBXNativeTarget "MCCacheManagerUITests" */ = {
 			isa = XCConfigurationList;
@@ -508,6 +510,7 @@
 				A04185E51C5F34C100DA0FE9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
