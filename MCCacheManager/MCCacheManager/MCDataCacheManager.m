@@ -55,6 +55,7 @@ static MCDataCacheManager *_instance;
     }
     return self;
 }
+/*-------------------------------------写入-----------------------------------------------------------*/
 /**
  *  设置默认过期时间
  */
@@ -67,11 +68,17 @@ static MCDataCacheManager *_instance;
 - (void)MCwriteNoDefautExpireData:(id)dict withFile:(NSString *)name {
     [self MCwriteData:dict withFile:name withExpireTime:0];
 }
+- (void)MCwriteNoDefautExpireData:(id)dict withFile:(NSString *)name withAccount:(NSString *)account{
+    [self MCwriteData:dict withFile:name withAccount:account withExpireTime:0];
+}
 /**
  *  写入数据(默认过期时间为设置时间:无设置或设置为0,则为5分钟)
  */
 - (void)MCwriteDefautExpireData:(id)dict withFile:(NSString *)name {
     [self MCwriteData:dict withFile:name withExpireTime:self.defautTime == 0 ? 60 * 5 : self.defautTime];
+}
+- (void)MCwriteDefautExpireData:(id)dict withFile:(NSString *)name withAccount:(NSString *)account{
+    [self MCwriteData:dict withFile:name withAccount:account withExpireTime:self.defautTime == 0 ? 60 * 5 : self.defautTime];
 }
 /**
  *  写入数据(自定义过期时间)
@@ -80,6 +87,11 @@ static MCDataCacheManager *_instance;
     [self writeData:dict withFile:name];
     [self writeConfigExpireTime:time withName:name];
 }
+- (void)MCwriteData:(id)dict withFile:(NSString *)name withAccount:(NSString *)account withExpireTime:(double)time{
+    [self writeData:dict withFile:name withAccount:account];
+    [self writeConfigExpireTime:time withName:[account stringByAppendingPathComponent:name]];
+}
+/*-------------------------------------读取-----------------------------------------------------------*/
 /**
  *  读取数据NSDictionary
  */
@@ -90,12 +102,26 @@ static MCDataCacheManager *_instance;
         return nil;
     }
 }
+- (id)MCreadData:(NSString *)name withAccount:(NSString *)account {
+    if ([self readFile:[account stringByAppendingPathComponent:name]]) {
+        return [NSDictionary dictionaryWithContentsOfFile:[self readFile:[account stringByAppendingPathComponent:name]]];
+    }else {
+        return nil;
+    }
+}
 /**
  *  读取数据JSON
  */
 - (id)MCreadJSONData:(NSString *)name {
     if ([self readFile:name]) {
         return [NSString stringWithContentsOfFile:[self readFile:name] encoding:NSUTF8StringEncoding error:nil];
+    }else {
+        return nil;
+    }
+}
+- (id)MCreadJSONData:(NSString *)name withAccount:(NSString *)account{
+    if ([self readFile:[account stringByAppendingPathComponent:name]]) {
+        return [NSString stringWithContentsOfFile:[self readFile:[account stringByAppendingPathComponent:name]] encoding:NSUTF8StringEncoding error:nil];
     }else {
         return nil;
     }
@@ -113,7 +139,51 @@ static MCDataCacheManager *_instance;
     }];
     return isEx;
 }
+- (BOOL)MCcheckExpireFile:(NSString *)name withAccount:(NSString *)account{
+    __block BOOL isEx = YES;
+    [self.fileList enumerateObjectsUsingBlock:^(NSDictionary * obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if ([obj[MC_PARAM_NAME_KEY] isEqualToString:[account stringByAppendingPathComponent:name]]) {
+            isEx = [obj[MC_PARAM_EXTIME_KEY]doubleValue] > [self getLocationTime] ? NO : YES;
+            *stop = YES;
+        }
+    }];
+    return isEx;
+}
 
+/*-------------------------------------删除-----------------------------------------------------------*/
+- (void)MCremoveData:(NSString *)name {
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSString * filepath = MC_FILE_PATH;
+    filepath = [filepath stringByAppendingPathComponent:name];
+    NSError *error;
+    if ([fileManager removeItemAtPath:filepath error:&error] != YES)
+        NSLog(@"Unable to delete file: %@", [error localizedDescription]);
+    [self deleteConfigName:name];
+}
+- (void)MCremoveData:(NSString *)name withAccount:(NSString *)account{
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSString * filepath = MC_FILE_PATH;
+    filepath = [[filepath stringByAppendingPathComponent:account]stringByAppendingPathComponent:name];
+    NSError *error;
+    if ([fileManager removeItemAtPath:filepath error:&error] != YES)
+        NSLog(@"Unable to delete file: %@", [error localizedDescription]);
+    [self deleteConfigName:[account stringByAppendingPathComponent:name]];
+}
+- (void)MCremoveAllData {
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSString * filepath = MC_FILE_PATH;
+    NSError *error;
+    if ([fileManager removeItemAtPath:filepath error:&error] != YES)
+        NSLog(@"Unable to delete file: %@", [error localizedDescription]);
+}
+- (void)MCremoveAllAccount:(NSString *)account {
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSString * filepath = [MC_FILE_PATH stringByAppendingPathComponent:account];
+    NSError *error;
+    if ([fileManager removeItemAtPath:filepath error:&error] != YES)
+        NSLog(@"Unable to delete file: %@", [error localizedDescription]);
+    [self deleteConfigAccount:account];
+}
 #pragma mark -配置参数
 - (NSMutableArray *)fileList {
     if (_fileList == nil) {
@@ -169,24 +239,54 @@ static MCDataCacheManager *_instance;
     __block BOOL isEx = NO;
     [self.fileList enumerateObjectsUsingBlock:^(NSDictionary * data, NSUInteger idx, BOOL * _Nonnull stop) {
         if ([data[MC_PARAM_NAME_KEY] isEqualToString:name]) {
-            [self.fileList removeObject:data[MC_PARAM_NAME_KEY]];
+            [self.fileList removeObject:data];
             isEx = YES;
             *stop = YES;
         }
     }];
     [self writeData:self.fileList withFile:MC_CONFIG_FILE];
 }
-
-
-
-
-
+- (void)deleteConfigAccount:(NSString *)account{
+    __block BOOL isEx = NO;
+    NSMutableArray * removeArray = [NSMutableArray array];
+    [self.fileList enumerateObjectsUsingBlock:^(NSDictionary * data, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSString * name = [[data[MC_PARAM_NAME_KEY] componentsSeparatedByString:@"/"]firstObject];
+        if ([name isEqualToString:account]) {
+//            [self.fileList removeObject:data];
+            isEx = YES;
+            [removeArray addObject:data];
+//            *stop = YES;
+        }
+    }];
+    [self.fileList removeObjectsInArray:removeArray];
+    [self writeData:self.fileList withFile:MC_CONFIG_FILE];
+}
 #pragma mark -原生方法
+/**
+ *  单独账户独立文件写入
+ */
+- (void)writeData:(id)param withFile:(NSString *)name withAccount:(NSString *)Account {
+    NSString * docPath = [MC_FILE_PATH stringByAppendingPathComponent:Account];
+    NSFileManager * mgr=[NSFileManager defaultManager];
+    BOOL dir=NO;
+    BOOL exists =[mgr fileExistsAtPath:docPath isDirectory:&dir];
+    NSString *filepath = [docPath stringByAppendingPathComponent:name];
+    if (exists) {
+        [param writeToFile:filepath atomically:YES];
+    }else {
+        NSError * error;
+        [mgr createDirectoryAtPath:docPath withIntermediateDirectories:YES attributes:nil error:&error];
+        if (error==nil) {
+            [param writeToFile:filepath atomically:YES];
+        }else {
+            NSLog(@"添加失败 %@",error);
+        }
+    }
+}
 /**
  *  写入文件初始方法
  */
 - (void)writeData:(id)param withFile:(NSString *)name {
-    
     NSString * docPath = MC_FILE_PATH;
     NSFileManager * mgr=[NSFileManager defaultManager];
     BOOL dir=NO;
@@ -205,7 +305,7 @@ static MCDataCacheManager *_instance;
     }
 }
 /**
- *  获取路径初始方法
+ *  获取文件初始方法
  */
 - (NSString *)readFile:(NSString *)name {
     NSString * filepath = MC_FILE_PATH;
@@ -220,25 +320,18 @@ static MCDataCacheManager *_instance;
         return nil;
     }
 }
-- (void)MCremoveData:(NSString *)name {
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString * filepath = MC_FILE_PATH;
-    filepath = [filepath stringByAppendingPathComponent:name];
-    NSError *error;
-    if ([fileManager removeItemAtPath:filepath error:&error] != YES)
-        NSLog(@"Unable to delete file: %@", [error localizedDescription]);
-    [self deleteConfigName:name];
-}
-- (void)MCremoveAllData {
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString * filepath = MC_FILE_PATH;
-    NSError *error;
-    if ([fileManager removeItemAtPath:filepath error:&error] != YES)
-        NSLog(@"Unable to delete file: %@", [error localizedDescription]);
-}
 - (NSTimeInterval)getLocationTime {
     NSDate* date = [NSDate dateWithTimeIntervalSinceNow:0];
     NSTimeInterval aDate=[date timeIntervalSince1970];
     return aDate;
+}
+/**
+ *  获取缓存路径
+ */
+- (NSString *)MCGetPath {
+    return MC_FILE_PATH;
+}
++ (NSString *)MCGetPath {
+    return MC_FILE_PATH;
 }
 @end
