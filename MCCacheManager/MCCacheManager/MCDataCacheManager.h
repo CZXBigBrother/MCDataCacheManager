@@ -20,10 +20,10 @@
  *  @param maxCacheSize(MB)
  */
 - (void)MCsetmaxCacheSize:(double)maxCacheSize;
-/**
- *  根本版本号存储,更新应用版本之后自动删除就版本缓存
- */
-- (void)MCAccordingToTheVersionStore:(BOOL)According;
+///**
+// *  根本版本号存储,更新应用版本之后自动删除就版本缓存
+// */
+//- (void)MCAccordingToTheVersionStore:(BOOL)According;
 /**
  *  获取缓存路径
  */
