@@ -30,7 +30,7 @@
 - (NSString *)MCGetPath;
 + (NSString *)MCGetPath;
 /**
- *  获取缓存空间大小
+ *  获取缓存空间大小(kb)
  */
 + (float)folderSize;
 - (float)folderSize;
