@@ -88,8 +88,12 @@ static MCDataCacheManager *_instance;
     [self writeConfigExpireTime:time withName:name];
 }
 - (void)MCwriteData:(id)dict withFile:(NSString *)name withAccount:(NSString *)account withExpireTime:(double)time{
-    [self writeData:dict withFile:name withAccount:account];
-    [self writeConfigExpireTime:time withName:[account stringByAppendingPathComponent:name]];
+    if (account==nil) {
+        [self MCwriteData:dict withFile:name withExpireTime:time];
+    }else{
+        [self writeData:dict withFile:name withAccount:account];
+        [self writeConfigExpireTime:time withName:[account stringByAppendingPathComponent:name]];
+    }
 }
 /*-------------------------------------读取-----------------------------------------------------------*/
 /**
@@ -103,6 +107,7 @@ static MCDataCacheManager *_instance;
     }
 }
 - (id)MCreadData:(NSString *)name withAccount:(NSString *)account {
+    if (account == nil) return  [self MCreadData:name];
     if ([self readFile:[account stringByAppendingPathComponent:name]]) {
         return [NSDictionary dictionaryWithContentsOfFile:[self readFile:[account stringByAppendingPathComponent:name]]];
     }else {
@@ -120,6 +125,7 @@ static MCDataCacheManager *_instance;
     }
 }
 - (id)MCreadJSONData:(NSString *)name withAccount:(NSString *)account{
+    if (account == nil) { return [self MCreadJSONData:name];}
     if ([self readFile:[account stringByAppendingPathComponent:name]]) {
         return [NSString stringWithContentsOfFile:[self readFile:[account stringByAppendingPathComponent:name]] encoding:NSUTF8StringEncoding error:nil];
     }else {
@@ -140,6 +146,7 @@ static MCDataCacheManager *_instance;
     return isEx;
 }
 - (BOOL)MCcheckExpireFile:(NSString *)name withAccount:(NSString *)account{
+    if (account == nil) {return [self MCcheckExpireFile:name];}
     __block BOOL isEx = YES;
     [self.fileList enumerateObjectsUsingBlock:^(NSDictionary * obj, NSUInteger idx, BOOL * _Nonnull stop) {
         if ([obj[MC_PARAM_NAME_KEY] isEqualToString:[account stringByAppendingPathComponent:name]]) {
@@ -161,6 +168,10 @@ static MCDataCacheManager *_instance;
     [self deleteConfigName:name];
 }
 - (void)MCremoveData:(NSString *)name withAccount:(NSString *)account{
+    if (account == nil) {
+        [self MCremoveData:name];
+        return;
+    }
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSString * filepath = [self MCGetPath];
     filepath = [[filepath stringByAppendingPathComponent:account]stringByAppendingPathComponent:name];
@@ -226,7 +237,7 @@ static MCDataCacheManager *_instance;
 - (void)writeConfigExpireTime:(double)time withName:(NSString *)name{
     
     NSDictionary * param = @{MC_PARAM_NAME_KEY : name
-                            ,MC_PARAM_EXTIME_KEY : @(([self getLocationTime] + time))};
+                             ,MC_PARAM_EXTIME_KEY : @(([self getLocationTime] + time))};
     
     __block BOOL isEx = NO;
     [self.fileList enumerateObjectsUsingBlock:^(NSDictionary * data, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -261,10 +272,10 @@ static MCDataCacheManager *_instance;
     [self.fileList enumerateObjectsUsingBlock:^(NSDictionary * data, NSUInteger idx, BOOL * _Nonnull stop) {
         NSString * name = [[data[MC_PARAM_NAME_KEY] componentsSeparatedByString:@"/"]firstObject];
         if ([name isEqualToString:account]) {
-//            [self.fileList removeObject:data];
+            //            [self.fileList removeObject:data];
             isEx = YES;
             [removeArray addObject:data];
-//            *stop = YES;
+            //            *stop = YES;
         }
     }];
     [self.fileList removeObjectsInArray:removeArray];
@@ -427,7 +438,7 @@ static MCDataCacheManager *_instance;
                 if ([fileManager removeItemAtPath:filepath error:&error] != YES)
                     NSLog(@"Unable to delete file: %@", [error localizedDescription]);
             }
-
+            
         }
     }
 }

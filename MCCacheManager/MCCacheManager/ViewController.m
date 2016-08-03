@@ -20,27 +20,22 @@
     MCDataCacheManager * cache = [MCDataCacheManager shareInstance];
     [cache MCAccordingToTheVersionStore:YES];
     [cache MCwriteData:@"dasdasdsadsadsa" withFile:@"2233" withAccount:@"czx1" withExpireTime:0];
-        NSLog(@"%lf",[cache folderSize]);
-    NSLog(@"%@",[cache MCGetPath]);
+    NSLog(@"%lf",[cache folderSize]);
+    NSLog(@"path = %@",[cache MCGetPath]);
 }
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    
-//    NSLog(@"TOUCH");
-//    NSLog(@"%@",[MCDataCacheManager MCGetPath]);
-
-
-
-//    [cache MCsetmaxCacheSize:2];
-//    for (NSInteger i = 0; i < 3000; i++) {
-//        [cache MCwriteData:@"dasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsa" withFile:[NSString stringWithFormat:@"%zd",i] withAccount:@"czx" withExpireTime:0];
-//    }
+    MCDataCacheManager * cache = [MCDataCacheManager shareInstance];
+    [cache MCsetmaxCacheSize:1];
+    for (NSInteger i = 0; i < 3000; i++) {
+        [cache MCwriteData:@"dasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsadasdasdsadsadsa" withFile:[NSString stringWithFormat:@"%zd",i] withAccount:@"czx" withExpireTime:0];
+    }
 //    [cache MCwriteData:@"dasdasdsadsadsa" withFile:@"3" withAccount:@"czx" withExpireTime:0];
 //    [cache MCwriteData:@"dasdasdsadsadsa" withFile:@"4" withAccount:@"czx" withExpireTime:0];
 //    [cache MCwriteData:@"dasdasdsadsadsa" withFile:@"4" withAccount:@"czx" withExpireTime:0];
 //    [cache MCwriteData:@"dasdasdsadsadsa" withFile:@"5" withAccount:@"czx" withExpireTime:0];
 //    [cache MCwriteData:@"dasdasdsadsadsa" withFile:@"6" withAccount:@"czx" withExpireTime:0];
 //    [cache MCwriteData:@"dasdasdsadsadsa" withFile:@"7" withAccount:@"czx" withExpireTime:0];
-
+//
 //    [cache MCremoveData:@"1" withAccount:@"czx"];
 //    [cache MCremoveAllAccount:@"czx"];
 //    [cache MCwriteData:@"dasdasdsadsadsa" withFile:@"dasdsadQWEQWEWQEWQEQWEWQE" withAccount:@"czx" withExpireTime:0];
@@ -49,8 +44,8 @@
     /**
      *  设定默认时间
      */
-//    [cache MCsetDefautExpireTime:5];
-//    
+//    [cache MCsetDefautExpireTime:5*60];
+    
 //    if ([cache MCcheckExpireFile:@"mc"]) {
 //        NSLog(@"数据已过期 result = %@",[cache MCreadData:@"mc"]);
 //

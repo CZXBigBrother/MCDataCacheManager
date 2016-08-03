@@ -62,11 +62,11 @@
  */
 - (void)MCwriteDefautExpireData:(id)dict withFile:(NSString *)name withAccount:(NSString *)account;
 /**
- *  写入数据(自定义过期时间)
+ *  写入数据(自定义过期时间,单位秒)
  */
 - (void)MCwriteData:(id)dict withFile:(NSString *)name withExpireTime:(double)time;
 /**
- *  写入数据(自定义过期时间,独立文件夹)
+ *  写入数据(自定义过期时间,独立文件夹,单位秒)
  */
 - (void)MCwriteData:(id)dict withFile:(NSString *)name withAccount:(NSString *)account withExpireTime:(double)time;
 /*-------------------------------------读取-------------------------------------*/
