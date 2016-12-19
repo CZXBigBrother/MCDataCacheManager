@@ -1,7 +1,7 @@
 # MCDataCacheManager
 MCDataCacheManager:A Simple Data Cache Framework
 
-/**
+
  *  设置默认过期时间
  */
 - (void)MCsetDefautExpireTime:(double)time;
